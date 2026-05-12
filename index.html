@@ -302,7 +302,7 @@ function PicksPage({user,profile,games,error,fetchOdds,lastUpdated}){
               {selected&&<i className="ti ti-check" style={{fontSize:14,color:activePt.accent,flexShrink:0}}/>}
               <div style={{minWidth:0}}>
                 <div style={{fontSize:13,fontWeight:600,whiteSpace:"nowrap"}}>{g.awayAbbr} <span style={{color:"#ccc",fontWeight:400}}>@</span> {g.homeAbbr}</div>
-                <div style={{fontSize:11,color:"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:160}}>{g.away} @ {g.home}</div>
+                <div style={{fontSize:11,color:"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:200}}>{g.away} @ {g.home}</div>
               </div>
             </div>
             <div style={{textAlign:"right",flexShrink:0}}>
@@ -624,19 +624,20 @@ function App(){
   const[page,setPage]=useState("picks");
   const[checkingAuth,setCheckingAuth]=useState(true);
 
+  const loadProfile=async(uid)=>{
+    const{data:p,error}=await sb.from("profiles").select("*").eq("id",uid).single();
+    if(p)setProfile(p);
+    return p;
+  };
+
   useEffect(()=>{
     sb.auth.getSession().then(async({data:{session}})=>{
-      if(session){
-        const{data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).single();
-        setUser(session.user);setProfile(p);
-      }
+      if(session){setUser(session.user);await loadProfile(session.user.id);}
       setCheckingAuth(false);
     });
     const{data:{subscription}}=sb.auth.onAuthStateChange(async(event,session)=>{
-      if(session){
-        const{data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).single();
-        setUser(session.user);setProfile(p);
-      } else {setUser(null);setProfile(null);}
+      if(session){setUser(session.user);await loadProfile(session.user.id);}
+      else{setUser(null);setProfile(null);}
     });
     return()=>subscription.unsubscribe();
   },[]);
@@ -652,12 +653,12 @@ function App(){
         <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
           <i className="ti ti-ball-football" style={{fontSize:20,flexShrink:0}}/>
           <span style={{fontSize:16,fontWeight:600}}>Pick'em</span>
-          <span style={{fontSize:11,color:"#999",background:"#f3f3f1",padding:"2px 7px",borderRadius:6,whiteSpace:"nowrap"}}>NFL 2025</span>
+          <span style={{fontSize:11,color:"#999",background:"#f3f3f1",padding:"2px 7px",borderRadius:6,whiteSpace:"nowrap"}}>NFL 2026</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
           <Avatar name={profile?.username||"?"} size={26}/>
           <span style={{fontSize:13,color:"#666",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:80}}>{profile?.username}</span>
-          <button onClick={signOut} style={{fontSize:11,padding:"3px 7px",color:"#999",whiteSpace:"nowrap"}}>Out</button>
+          <button onClick={signOut} style={{fontSize:11,padding:"3px 7px",color:"#999",whiteSpace:"nowrap"}}>Sign out</button>
         </div>
       </div>
       <NavBar page={page} setPage={setPage} isAdmin={profile?.is_admin}/>
