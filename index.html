@@ -56,6 +56,21 @@ const PICK_TYPES=[
 ];
 const pickScore=r=>r==="win"?1:r==="push"?0.5:0;
 
+const NFL_TEAMS={
+  "Arizona Cardinals":{abbr:"ARI"},"Atlanta Falcons":{abbr:"ATL"},"Baltimore Ravens":{abbr:"BAL"},
+  "Buffalo Bills":{abbr:"BUF"},"Carolina Panthers":{abbr:"CAR"},"Chicago Bears":{abbr:"CHI"},
+  "Cincinnati Bengals":{abbr:"CIN"},"Cleveland Browns":{abbr:"CLE"},"Dallas Cowboys":{abbr:"DAL"},
+  "Denver Broncos":{abbr:"DEN"},"Detroit Lions":{abbr:"DET"},"Green Bay Packers":{abbr:"GB"},
+  "Houston Texans":{abbr:"HOU"},"Indianapolis Colts":{abbr:"IND"},"Jacksonville Jaguars":{abbr:"JAX"},
+  "Kansas City Chiefs":{abbr:"KC"},"Las Vegas Raiders":{abbr:"LV"},"Los Angeles Chargers":{abbr:"LAC"},
+  "Los Angeles Rams":{abbr:"LAR"},"Miami Dolphins":{abbr:"MIA"},"Minnesota Vikings":{abbr:"MIN"},
+  "New England Patriots":{abbr:"NE"},"New Orleans Saints":{abbr:"NO"},"New York Giants":{abbr:"NYG"},
+  "New York Jets":{abbr:"NYJ"},"Philadelphia Eagles":{abbr:"PHI"},"Pittsburgh Steelers":{abbr:"PIT"},
+  "San Francisco 49ers":{abbr:"SF"},"Seattle Seahawks":{abbr:"SEA"},"Tampa Bay Buccaneers":{abbr:"TB"},
+  "Tennessee Titans":{abbr:"TEN"},"Washington Commanders":{abbr:"WAS"},
+};
+const teamAbbr=t=>NFL_TEAMS[t]?.abbr||t.split(" ").pop().slice(0,3).toUpperCase();
+
 function parseGames(raw){
   return raw.map(g=>{
     const home=g.home_team,away=g.away_team;
@@ -67,8 +82,7 @@ function parseGames(raw){
       if(sm){const ho=sm.outcomes?.find(o=>o.name===home);const ao=sm.outcomes?.find(o=>o.name===away);if(ho&&ao){if(ho.point<0){favorite=home;underdog=away;spread=ho.point;}else{favorite=away;underdog=home;spread=ao.point;}}}
       if(tm){const ov=tm.outcomes?.find(o=>o.name==="Over");if(ov)total=ov.point;}
     }
-    const abbr=t=>t.split(" ").pop().slice(0,3).toUpperCase();
-    return{id:g.id,away,home,awayAbbr:abbr(away),homeAbbr:abbr(home),spread,favorite,underdog,total,commenceTime:g.commence_time};
+    return{id:g.id,away,home,awayAbbr:teamAbbr(away),homeAbbr:teamAbbr(home),spread,favorite,underdog,total,commenceTime:g.commence_time};
   }).filter(g=>g.spread!==null&&g.total!==null);
 }
 
