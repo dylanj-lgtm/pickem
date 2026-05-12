@@ -70,7 +70,8 @@ const PICK_TYPES=[
 const pickScore=r=>r==="win"?1:r==="push"?0.5:0;
 
 function parseGames(raw){
-  return raw.map(g=>{
+  // Only show games within the next 8 days from the earliest game
+  const parsed=raw.map(g=>{
     const home=g.home_team,away=g.away_team;
     let spread=null,favorite=null,underdog=null,total=null;
     const book=g.bookmakers?.[0];
@@ -82,6 +83,13 @@ function parseGames(raw){
     }
     return{id:g.id,away,home,awayAbbr:teamAbbr(away),homeAbbr:teamAbbr(home),spread,favorite,underdog,total,commenceTime:g.commence_time};
   }).filter(g=>g.spread!==null&&g.total!==null);
+
+  if(parsed.length===0)return[];
+  // Group games by the week they fall in (Thu–Wed window)
+  const earliest=new Date(Math.min(...parsed.map(g=>new Date(g.commenceTime))));
+  const cutoff=new Date(earliest);
+  cutoff.setDate(cutoff.getDate()+8);
+  return parsed.filter(g=>new Date(g.commenceTime)<=cutoff);
 }
 
 function lineLabel(type,g){
@@ -192,15 +200,15 @@ function PicksPage({profile,games,error,fetchOdds}){
   const[existingPicks,setExistingPicks]=useState([]);
   const[loadingPicks,setLoadingPicks]=useState(true);
 
-  useEffect(()=>{
-    (async()=>{
-      setLoadingPicks(true);
-      const{data}=await sb.from("picks").select("*").eq("user_id",profile.id).eq("week",weekNum);
-      if(data&&data.length===4){setExistingPicks(data);setSubmitted(true);}
-      else{setExistingPicks([]);setSubmitted(false);setPicks({over:null,under:null,favorite:null,underdog:null});}
-      setLoadingPicks(false);
-    })();
-  },[weekNum,profile.id]);
+  const loadPicks=async()=>{
+    setLoadingPicks(true);
+    const{data}=await sb.from("picks").select("*").eq("user_id",profile.id).eq("week",weekNum);
+    if(data&&data.length>0){setExistingPicks(data);setSubmitted(true);}
+    else{setExistingPicks([]);setSubmitted(false);setPicks({over:null,under:null,favorite:null,underdog:null});}
+    setLoadingPicks(false);
+  };
+
+  useEffect(()=>{loadPicks();},[weekNum,profile.id]);
 
   const usedGames=Object.entries(picks).filter(([k,v])=>v&&k!==activeType).map(([,v])=>v.gameId);
   const allPicked=PICK_TYPES.every(pt=>picks[pt.key]);
@@ -223,7 +231,8 @@ function PicksPage({profile,games,error,fetchOdds}){
       result:"pending"
     }));
     await sb.from("picks").upsert(rows,{onConflict:"user_id,week,pick_type"});
-    setSubmitted(true);setSaving(false);
+    await loadPicks();
+    setSaving(false);
   };
 
   const rs={win:{bg:"rgba(5,150,105,0.1)",color:"#059669",label:"✓ Win"},push:{bg:"rgba(217,119,6,0.1)",color:"#d97706",label:"~ Push"},loss:{bg:"rgba(220,38,38,0.1)",color:"#dc2626",label:"✗ Loss"},pending:{bg:"#f9f9f8",color:"#999",label:"Pending"}};
