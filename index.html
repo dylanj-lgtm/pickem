@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <title>Pick'em Challenge</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -10,41 +10,64 @@
   <link rel="stylesheet" href="https://unpkg.com/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #f9f9f8; color: #1a1a1a; }
+    body { font-family: system-ui, sans-serif; background: #f9f9f8; color: #1a1a1a; -webkit-text-size-adjust: 100%; }
     input, button { font-family: inherit; font-size: 14px; outline: none; }
     input { border: 1px solid #ddd; border-radius: 8px; padding: 8px 12px; width: 100%; background: #fff; color: #1a1a1a; }
     input:focus { border-color: #888; }
     button { border: 1px solid #ddd; border-radius: 8px; padding: 7px 14px; background: #fff; color: #1a1a1a; cursor: pointer; }
     button:hover { background: #f3f3f1; }
-    :root {
-      --color-background-primary: #ffffff;
-      --color-background-secondary: #f3f3f1;
-      --color-text-primary: #1a1a1a;
-      --color-text-secondary: #666;
-      --color-text-tertiary: #999;
-      --color-border-tertiary: rgba(0,0,0,0.12);
-      --color-border-secondary: rgba(0,0,0,0.2);
-      --color-background-success: rgba(5,150,105,0.1);
-      --color-text-success: #059669;
-      --color-background-danger: rgba(220,38,38,0.1);
-      --color-text-danger: #dc2626;
-      --color-background-warning: rgba(217,119,6,0.1);
-      --color-text-warning: #d97706;
-      --color-background-info: rgba(2,132,199,0.1);
-      --color-text-info: #0284c7;
-      --border-radius-md: 8px;
-      --border-radius-lg: 12px;
-    }
     @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+
+    /* Mobile nav: scrollable */
+    .nav-bar { display:flex; gap:0; border-bottom:1px solid #e5e5e3; margin-bottom:20px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    .nav-bar::-webkit-scrollbar { display:none; }
+    .nav-btn { padding:10px 12px; border:none; border-bottom:2px solid transparent; border-radius:0; background:none; cursor:pointer; font-size:12px; white-space:nowrap; display:flex; align-items:center; gap:5px; margin-bottom:-1px; flex-shrink:0; }
+
+    /* Stat cards: 2 cols on mobile, 4 on desktop */
+    .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:20px; }
+    @media(min-width:500px){ .stat-grid { grid-template-columns:repeat(4,1fr); } }
+
+    /* Pick type selector: 2x2 on mobile, 4 across on desktop */
+    .pick-type-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+    @media(min-width:500px){ .pick-type-grid { grid-template-columns:repeat(4,1fr); } }
+
+    /* Leaderboard table: scrollable on mobile */
+    .lb-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:12px; border:1px solid #e5e5e3; margin-bottom:20px; }
+    .lb-table { min-width:420px; width:100%; }
+
+    /* Game card: stack info on mobile */
+    .game-card { padding:12px 14px; border-radius:12px; border:1px solid #e5e5e3; background:#fff; display:flex; align-items:center; justify-content:space-between; gap:8px; text-align:left; width:100%; cursor:pointer; }
+    .game-card-left { display:flex; align-items:center; gap:8px; min-width:0; }
+    .game-names { min-width:0; }
+    .game-abbr { font-size:13px; font-weight:600; white-space:nowrap; }
+    .game-full { font-size:11px; color:#999; margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px; }
+    .game-card-right { text-align:right; flex-shrink:0; }
+    .game-line { font-size:13px; font-weight:600; white-space:nowrap; }
+    .game-time { font-size:11px; color:#999; margin-top:1px; white-space:nowrap; }
+
+    /* History pick row */
+    .pick-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .pick-row-left { display:flex; align-items:center; gap:8px; min-width:0; }
+    .pick-label { font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .pick-line { font-size:11px; color:#999; }
+
+    /* Admin result buttons: smaller on mobile */
+    .result-row { display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap; }
+    .result-info { display:flex; align-items:center; gap:6px; min-width:0; }
+    .result-btns { display:flex; gap:4px; flex-shrink:0; }
+
+    /* Header */
+    .app-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:8px; }
+    .app-title { display:flex; align-items:center; gap:8px; min-width:0; }
+    .app-user { display:flex; align-items:center; gap:6px; flex-shrink:0; }
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
     const { useState, useEffect, useCallback } = React;
-
     const ODDS_PROXY = "/api/odds";
 
     const MOCK_LEADERBOARD = [
@@ -57,16 +80,16 @@
     ];
 
     const MOCK_HISTORY = [
-      { week:1, picks:{over:{label:"DAL @ PHI",line:"O 51.5"},under:{label:"DEN @ LV",line:"U 40.5"},favorite:{label:"BAL -3.5"},underdog:{label:"GB +3.0"}}, results:{over:"win",under:"push",favorite:"win",underdog:"loss"} },
-      { week:2, picks:{over:{label:"BUF @ MIA",line:"O 44.0"},under:{label:"CIN @ CLE",line:"U 42.0"},favorite:{label:"SF -4.0"},underdog:{label:"ARI +7.0"}}, results:{over:"win",under:"win",favorite:"win",underdog:"loss"} },
-      { week:3, picks:{over:{label:"KC @ BAL",line:"O 48.5"},under:{label:"DAL @ PHI",line:"U 51.5"},favorite:{label:"CIN -5.5"},underdog:{label:"BUF +2.5"}}, results:{over:"loss",under:"win",favorite:"push",underdog:"win"} },
+      { week:1, picks:{over:{label:"DAL @ PHI",line:"O 51.5"},under:{label:"DEN @ LV",line:"U 40.5"},favorite:{label:"BAL -3.5",line:""},underdog:{label:"GB +3.0",line:""}}, results:{over:"win",under:"push",favorite:"win",underdog:"loss"} },
+      { week:2, picks:{over:{label:"BUF @ MIA",line:"O 44.0"},under:{label:"CIN @ CLE",line:"U 42.0"},favorite:{label:"SF -4.0",line:""},underdog:{label:"ARI +7.0",line:""}}, results:{over:"win",under:"win",favorite:"win",underdog:"loss"} },
+      { week:3, picks:{over:{label:"KC @ BAL",line:"O 48.5"},under:{label:"DAL @ PHI",line:"U 51.5"},favorite:{label:"CIN -5.5",line:""},underdog:{label:"BUF +2.5",line:""}}, results:{over:"loss",under:"win",favorite:"push",underdog:"win"} },
     ];
 
     const PICK_TYPES = [
       { key:"over",     label:"Over",     icon:"ti-arrow-up",   accent:"#059669", accentBg:"rgba(5,150,105,0.12)",  desc:"Total goes over" },
       { key:"under",    label:"Under",    icon:"ti-arrow-down", accent:"#0284c7", accentBg:"rgba(2,132,199,0.12)",  desc:"Total goes under" },
-      { key:"favorite", label:"Favorite", icon:"ti-star",       accent:"#d97706", accentBg:"rgba(217,119,6,0.12)",  desc:"Covers the spread" },
-      { key:"underdog", label:"Underdog", icon:"ti-heart",      accent:"#dc2626", accentBg:"rgba(220,38,38,0.12)",  desc:"Beats the spread" },
+      { key:"favorite", label:"Favorite", icon:"ti-star",       accent:"#d97706", accentBg:"rgba(217,119,6,0.12)",  desc:"Covers spread" },
+      { key:"underdog", label:"Underdog", icon:"ti-heart",      accent:"#dc2626", accentBg:"rgba(220,38,38,0.12)",  desc:"Beats spread" },
     ];
 
     const pickScore = r => r==="win"?1:r==="push"?0.5:0;
@@ -76,32 +99,28 @@
         const home=g.home_team, away=g.away_team;
         let spread=null,favorite=null,underdog=null,total=null;
         const book=g.bookmakers?.[0];
-        if (book) {
+        if(book){
           const sm=book.markets?.find(m=>m.key==="spreads");
           const tm=book.markets?.find(m=>m.key==="totals");
-          if (sm) {
-            const ho=sm.outcomes?.find(o=>o.name===home);
-            const ao=sm.outcomes?.find(o=>o.name===away);
-            if (ho&&ao) { if(ho.point<0){favorite=home;underdog=away;spread=ho.point;}else{favorite=away;underdog=home;spread=ao.point;} }
-          }
-          if (tm) { const ov=tm.outcomes?.find(o=>o.name==="Over"); if(ov) total=ov.point; }
+          if(sm){const ho=sm.outcomes?.find(o=>o.name===home);const ao=sm.outcomes?.find(o=>o.name===away);if(ho&&ao){if(ho.point<0){favorite=home;underdog=away;spread=ho.point;}else{favorite=away;underdog=home;spread=ao.point;}}}
+          if(tm){const ov=tm.outcomes?.find(o=>o.name==="Over");if(ov)total=ov.point;}
         }
         const abbr=t=>t.split(" ").pop().slice(0,3).toUpperCase();
-        return { id:g.id, away, home, awayAbbr:abbr(away), homeAbbr:abbr(home), spread, favorite, underdog, total, commenceTime:g.commence_time, status:"upcoming", score:{away:0,home:0} };
+        return {id:g.id,away,home,awayAbbr:abbr(away),homeAbbr:abbr(home),spread,favorite,underdog,total,commenceTime:g.commence_time};
       }).filter(g=>g.spread!==null&&g.total!==null);
     }
 
-    function Avatar({name,size=36}) {
+    function Avatar({name,size=36}){
       const p=["#4f46e5","#0891b2","#059669","#d97706","#dc2626","#7c3aed","#db2777","#0284c7"];
       return <div style={{width:size,height:size,borderRadius:"50%",background:p[name.charCodeAt(0)%p.length],display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:size*0.36,fontWeight:600,flexShrink:0}}>{name.slice(0,2).toUpperCase()}</div>;
     }
 
-    function NavBar({page,setPage}) {
+    function NavBar({page,setPage}){
       const tabs=[{id:"picks",label:"My Picks",icon:"ti-home"},{id:"leaderboard",label:"Standings",icon:"ti-trophy"},{id:"history",label:"History",icon:"ti-history"},{id:"admin",label:"Results",icon:"ti-adjustments-horizontal"}];
-      return (
-        <nav style={{display:"flex",gap:2,borderBottom:"1px solid #e5e5e3",marginBottom:28}}>
+      return(
+        <nav className="nav-bar">
           {tabs.map(t=>(
-            <button key={t.id} onClick={()=>setPage(t.id)} style={{padding:"10px 14px",border:"none",borderBottom:`2px solid ${page===t.id?"#1a1a1a":"transparent"}`,borderRadius:0,background:"none",cursor:"pointer",fontSize:13,fontWeight:page===t.id?600:400,color:page===t.id?"#1a1a1a":"#666",marginBottom:-1,display:"flex",alignItems:"center",gap:6}}>
+            <button key={t.id} className="nav-btn" onClick={()=>setPage(t.id)} style={{fontWeight:page===t.id?600:400,color:page===t.id?"#1a1a1a":"#666",borderBottomColor:page===t.id?"#1a1a1a":"transparent"}}>
               <i className={`ti ${t.icon}`} style={{fontSize:14}}/>{t.label}
             </button>
           ))}
@@ -109,62 +128,59 @@
       );
     }
 
-    function LoginPage({onLogin}) {
-      const [name,setName]=useState(""); const [isNew,setIsNew]=useState(false);
-      return (
-        <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:24}}>
+    function LoginPage({onLogin}){
+      const [name,setName]=useState("");const [isNew,setIsNew]=useState(false);
+      return(
+        <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
           <div style={{width:"100%",maxWidth:380}}>
-            <div style={{textAlign:"center",marginBottom:32}}>
-              <div style={{width:56,height:56,borderRadius:16,background:"#f3f3f1",border:"1px solid #e5e5e3",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}>
+            <div style={{textAlign:"center",marginBottom:28}}>
+              <div style={{width:56,height:56,borderRadius:16,background:"#f3f3f1",border:"1px solid #e5e5e3",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px"}}>
                 <i className="ti ti-ball-football" style={{fontSize:28}}/>
               </div>
-              <h1 style={{fontSize:24,fontWeight:600,margin:"0 0 6px"}}>Pick'em Challenge</h1>
-              <p style={{fontSize:14,color:"#666",margin:0}}>NFL Season 2025</p>
+              <h1 style={{fontSize:22,fontWeight:600,margin:"0 0 4px"}}>Pick'em Challenge</h1>
+              <p style={{fontSize:14,color:"#666"}}>NFL Season 2025</p>
             </div>
-            <div style={{background:"#fff",border:"1px solid #e5e5e3",borderRadius:16,padding:24}}>
-              <div style={{display:"flex",background:"#f3f3f1",borderRadius:10,padding:3,marginBottom:20,gap:3}}>
+            <div style={{background:"#fff",border:"1px solid #e5e5e3",borderRadius:16,padding:20}}>
+              <div style={{display:"flex",background:"#f3f3f1",borderRadius:10,padding:3,marginBottom:18,gap:3}}>
                 {["Sign in","Sign up"].map((l,i)=>(
                   <button key={l} onClick={()=>setIsNew(i===1)} style={{flex:1,padding:"7px 0",border:"none",borderRadius:8,fontSize:13,fontWeight:500,background:isNew===(i===1)?"#fff":"transparent",color:"#1a1a1a"}}>{l}</button>
                 ))}
               </div>
               {[["Username","text","Your username"],...(isNew?[["Group code","text","Invite code"]]:[]),["Password","password","••••••••"]].map(([label,type,ph])=>(
-                <div key={label} style={{marginBottom:14}}>
-                  <label style={{fontSize:12,fontWeight:600,color:"#666",display:"block",marginBottom:5,letterSpacing:"0.04em"}}>{label.toUpperCase()}</label>
+                <div key={label} style={{marginBottom:12}}>
+                  <label style={{fontSize:12,fontWeight:600,color:"#666",display:"block",marginBottom:4,letterSpacing:"0.04em"}}>{label.toUpperCase()}</label>
                   <input type={type} placeholder={ph} value={label==="Username"?name:undefined} onChange={label==="Username"?e=>setName(e.target.value):undefined}/>
                 </div>
               ))}
-              <button onClick={()=>name&&onLogin(name)} style={{width:"100%",marginTop:8,padding:"10px 0",fontSize:14,fontWeight:600,borderRadius:10,border:"none",background:name?"#1a1a1a":"#e5e5e3",color:name?"#fff":"#999",cursor:name?"pointer":"not-allowed"}}>
+              <button onClick={()=>name&&onLogin(name)} style={{width:"100%",marginTop:8,padding:"11px 0",fontSize:14,fontWeight:600,borderRadius:10,border:"none",background:name?"#1a1a1a":"#e5e5e3",color:name?"#fff":"#999",cursor:name?"pointer":"not-allowed"}}>
                 {isNew?"Create account":"Sign in"}
               </button>
             </div>
-            <p style={{textAlign:"center",fontSize:12,color:"#999",marginTop:14}}>Demo: type any name and sign in</p>
+            <p style={{textAlign:"center",fontSize:12,color:"#999",marginTop:12}}>Demo: type any name and sign in</p>
           </div>
         </div>
       );
     }
 
-    function OddsLoader({children}) {
+    function OddsLoader({children}){
       const [games,setGames]=useState(null);
       const [error,setError]=useState(null);
       const [loading,setLoading]=useState(true);
       const [lastUpdated,setLastUpdated]=useState(null);
-
       const fetchOdds=useCallback(async()=>{
         setLoading(true);setError(null);
-        try {
+        try{
           const res=await fetch(ODDS_PROXY);
-          if(!res.ok) throw new Error(`Error ${res.status}`);
+          if(!res.ok)throw new Error(`Error ${res.status}`);
           const data=await res.json();
           if(!Array.isArray(data)||data.length===0){setGames([]);setError("No NFL games with lines right now. Check back closer to the season.");}
           else{setGames(parseGames(data));}
           setLastUpdated(new Date());
-        } catch(e){setError("Could not load odds: "+e.message);}
+        }catch(e){setError("Could not load odds: "+e.message);}
         finally{setLoading(false);}
       },[]);
-
       useEffect(()=>{fetchOdds();},[fetchOdds]);
-
-      if(loading) return (
+      if(loading)return(
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"80px 0",gap:12}}>
           <i className="ti ti-refresh" style={{fontSize:32,color:"#999",animation:"spin 1s linear infinite"}}/>
           <p style={{fontSize:14,color:"#666"}}>Fetching live NFL lines...</p>
@@ -173,94 +189,99 @@
       return children({games:games||[],error,fetchOdds,lastUpdated});
     }
 
-    function PicksPage({games,error,fetchOdds,lastUpdated}) {
+    function PicksPage({games,error,fetchOdds,lastUpdated}){
       const [picks,setPicks]=useState({over:null,under:null,favorite:null,underdog:null});
       const [submitted,setSubmitted]=useState(false);
       const [loading,setLoading]=useState(false);
       const [activeType,setActiveType]=useState("over");
-
       const usedGames=Object.entries(picks).filter(([k,v])=>v&&k!==activeType).map(([,v])=>v.gameId);
       const allPicked=PICK_TYPES.every(pt=>picks[pt.key]);
       const activePt=PICK_TYPES.find(pt=>pt.key===activeType);
-
       const selectPick=(game)=>{
         if(submitted)return;
         setPicks(p=>({...p,[activeType]:p[activeType]?.gameId===game.id?null:{gameId:game.id,game}}));
         const next=PICK_TYPES.find(t=>t.key!==activeType&&!picks[t.key]);
         if(next)setActiveType(next.key);
       };
-
       const gameTime=(t)=>{
         if(!t)return"";
         const d=new Date(t);
-        return d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})+" · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+        return d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
       };
-
-      return (
+      const lineLabel=(type,g)=>{
+        if(!g)return"";
+        if(type==="over")return`O ${g.total}`;
+        if(type==="under")return`U ${g.total}`;
+        if(type==="favorite")return`${g.favorite?.split(" ").pop()} ${g.spread}`;
+        return`${g.underdog?.split(" ").pop()} +${Math.abs(g.spread)}`;
+      };
+      return(
         <div style={{maxWidth:620,margin:"0 auto"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
-            <div>
-              <h2 style={{fontSize:18,fontWeight:600,margin:"0 0 3px"}}>Week picks</h2>
-              <p style={{fontSize:13,color:"#666",margin:0}}>Locks Thursday at kickoff · 4 different games required</p>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,gap:8}}>
+            <div style={{minWidth:0}}>
+              <h2 style={{fontSize:17,fontWeight:600,margin:"0 0 2px"}}>Week picks</h2>
+              <p style={{fontSize:12,color:"#666",margin:0}}>Locks Thursday · 4 different games</p>
             </div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              {lastUpdated&&<span style={{fontSize:11,color:"#999"}}>Updated {lastUpdated.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}</span>}
-              <button onClick={fetchOdds} style={{padding:"5px 10px",fontSize:12,display:"flex",alignItems:"center",gap:5}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+              {lastUpdated&&<span style={{fontSize:10,color:"#999"}}>{lastUpdated.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}</span>}
+              <button onClick={fetchOdds} style={{padding:"5px 10px",fontSize:12,display:"flex",alignItems:"center",gap:4}}>
                 <i className="ti ti-refresh" style={{fontSize:12}}/>Refresh
               </button>
             </div>
           </div>
 
-          {error&&<div style={{padding:"12px 14px",background:"rgba(220,38,38,0.08)",border:"1px solid rgba(220,38,38,0.2)",borderRadius:10,marginBottom:16,fontSize:13,color:"#dc2626"}}><i className="ti ti-alert-circle" style={{marginRight:6}}/>{error}</div>}
+          {error&&<div style={{padding:"10px 12px",background:"rgba(220,38,38,0.08)",border:"1px solid rgba(220,38,38,0.2)",borderRadius:10,marginBottom:14,fontSize:13,color:"#dc2626"}}><i className="ti ti-alert-circle" style={{marginRight:6}}/>{error}</div>}
 
           {games.length===0&&!error&&(
-            <div style={{padding:"40px 0",textAlign:"center",color:"#666"}}>
-              <i className="ti ti-calendar-off" style={{fontSize:40,display:"block",marginBottom:10,color:"#999"}}/>
-              <p style={{fontSize:14,margin:0}}>No NFL games with lines available right now.</p>
+            <div style={{padding:"40px 0",textAlign:"center"}}>
+              <i className="ti ti-calendar-off" style={{fontSize:36,display:"block",marginBottom:10,color:"#999"}}/>
+              <p style={{fontSize:14,color:"#666",margin:0}}>No NFL games with lines right now.</p>
               <p style={{fontSize:13,color:"#999",margin:"4px 0 0"}}>Check back closer to the season.</p>
             </div>
           )}
 
           {games.length>0&&<>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:16}}>
+            <div className="pick-type-grid">
               {PICK_TYPES.map(pt=>{
                 const hasPick=!!picks[pt.key];const isActive=activeType===pt.key;
-                return (
-                  <button key={pt.key} onClick={()=>!submitted&&setActiveType(pt.key)} style={{padding:"10px 8px",borderRadius:10,textAlign:"center",border:isActive?`2px solid ${pt.accent}`:"1px solid #e5e5e3",background:isActive?pt.accentBg:hasPick?"#f9f9f8":"#fff"}}>
-                    <i className={`ti ${pt.icon}`} style={{fontSize:16,color:isActive||hasPick?pt.accent:"#ccc",display:"block",marginBottom:4}}/>
+                return(
+                  <button key={pt.key} onClick={()=>!submitted&&setActiveType(pt.key)} style={{padding:"10px 6px",borderRadius:10,textAlign:"center",border:isActive?`2px solid ${pt.accent}`:"1px solid #e5e5e3",background:isActive?pt.accentBg:hasPick?"#f9f9f8":"#fff",width:"100%"}}>
+                    <i className={`ti ${pt.icon}`} style={{fontSize:15,color:isActive||hasPick?pt.accent:"#ccc",display:"block",marginBottom:3}}/>
                     <div style={{fontSize:11,fontWeight:600,color:isActive?pt.accent:"#666"}}>{pt.label}</div>
-                    <div style={{fontSize:10,color:"#999",marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{hasPick?`${picks[pt.key].game.awayAbbr}@${picks[pt.key].game.homeAbbr}`:"Pick a game"}</div>
+                    <div style={{fontSize:10,color:"#999",marginTop:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"0 2px"}}>
+                      {hasPick?`${picks[pt.key].game.awayAbbr}@${picks[pt.key].game.homeAbbr}`:"Pick game"}
+                    </div>
                   </button>
                 );
               })}
             </div>
 
             {!submitted&&(
-              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,padding:"10px 14px",background:activePt.accentBg,borderRadius:10,border:`1px solid ${activePt.accent}33`}}>
-                <i className={`ti ${activePt.icon}`} style={{fontSize:15,color:activePt.accent}}/>
-                <span style={{fontSize:13,fontWeight:600,color:activePt.accent}}>Selecting: {activePt.label}</span>
-                <span style={{fontSize:12,color:"#666",marginLeft:4}}>{activePt.desc}</span>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,padding:"9px 12px",background:activePt.accentBg,borderRadius:10,border:`1px solid ${activePt.accent}33`}}>
+                <i className={`ti ${activePt.icon}`} style={{fontSize:14,color:activePt.accent,flexShrink:0}}/>
+                <span style={{fontSize:13,fontWeight:600,color:activePt.accent}}>{activePt.label}</span>
+                <span style={{fontSize:12,color:"#666"}}>{activePt.desc}</span>
               </div>
             )}
 
             {!submitted&&(
-              <div style={{display:"grid",gap:8,marginBottom:20}}>
+              <div style={{display:"grid",gap:8,marginBottom:16}}>
                 {games.map(g=>{
                   const locked=usedGames.includes(g.id);
                   const selected=picks[activeType]?.gameId===g.id;
-                  const lineLabel=activeType==="over"?`O ${g.total}`:activeType==="under"?`U ${g.total}`:activeType==="favorite"?`${g.favorite?.split(" ").pop()} ${g.spread}`:`${g.underdog?.split(" ").pop()} +${Math.abs(g.spread)}`;
-                  return (
-                    <button key={g.id} onClick={()=>!locked&&selectPick(g)} style={{padding:"12px 14px",borderRadius:12,border:selected?`2px solid ${activePt.accent}`:"1px solid #e5e5e3",background:selected?activePt.accentBg:"#fff",cursor:locked?"not-allowed":"pointer",opacity:locked?0.4:1,display:"flex",alignItems:"center",justifyContent:"space-between",textAlign:"left"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        {selected&&<i className="ti ti-check" style={{fontSize:14,color:activePt.accent}}/>}
-                        <div>
-                          <div style={{fontSize:13,fontWeight:600}}>{g.awayAbbr} <span style={{color:"#ccc",fontWeight:400}}>@</span> {g.homeAbbr}</div>
-                          <div style={{fontSize:11,color:"#999",marginTop:1}}>{g.away} @ {g.home}</div>
+                  return(
+                    <button className="game-card" key={g.id} onClick={()=>!locked&&selectPick(g)}
+                      style={{border:selected?`2px solid ${activePt.accent}`:"1px solid #e5e5e3",background:selected?activePt.accentBg:"#fff",opacity:locked?0.4:1,cursor:locked?"not-allowed":"pointer"}}>
+                      <div className="game-card-left">
+                        {selected&&<i className="ti ti-check" style={{fontSize:14,color:activePt.accent,flexShrink:0}}/>}
+                        <div className="game-names">
+                          <div className="game-abbr">{g.awayAbbr} <span style={{color:"#ccc",fontWeight:400}}>@</span> {g.homeAbbr}</div>
+                          <div className="game-full">{g.away} @ {g.home}</div>
                         </div>
                       </div>
-                      <div style={{textAlign:"right"}}>
-                        <div style={{fontSize:13,fontWeight:600,color:selected?activePt.accent:"#1a1a1a"}}>{lineLabel}</div>
-                        <div style={{fontSize:11,color:"#999",marginTop:1}}>{gameTime(g.commenceTime)}</div>
+                      <div className="game-card-right">
+                        <div className="game-line" style={{color:selected?activePt.accent:"#1a1a1a"}}>{lineLabel(activeType,g)}</div>
+                        <div className="game-time">{gameTime(g.commenceTime)}</div>
                       </div>
                     </button>
                   );
@@ -269,22 +290,21 @@
             )}
 
             {submitted&&(
-              <div style={{display:"grid",gap:8,marginBottom:20}}>
+              <div style={{display:"grid",gap:8,marginBottom:16}}>
                 {PICK_TYPES.map(pt=>{
                   const pick=picks[pt.key];const g=pick.game;
-                  const lineLabel=pt.key==="over"?`O ${g.total}`:pt.key==="under"?`U ${g.total}`:pt.key==="favorite"?`${g.favorite?.split(" ").pop()} ${g.spread}`:`${g.underdog?.split(" ").pop()} +${Math.abs(g.spread)}`;
-                  return (
-                    <div key={pt.key} style={{padding:"14px 16px",borderRadius:12,border:"1px solid #e5e5e3",background:"#fff",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <div style={{width:32,height:32,borderRadius:8,background:pt.accentBg,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                          <i className={`ti ${pt.icon}`} style={{fontSize:15,color:pt.accent}}/>
+                  return(
+                    <div key={pt.key} style={{padding:"12px 14px",borderRadius:12,border:"1px solid #e5e5e3",background:"#fff",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
+                        <div style={{width:30,height:30,borderRadius:8,background:pt.accentBg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                          <i className={`ti ${pt.icon}`} style={{fontSize:14,color:pt.accent}}/>
                         </div>
-                        <div>
-                          <div style={{fontSize:13,fontWeight:600}}>{g.away} @ {g.home}</div>
-                          <div style={{fontSize:12,color:"#666",marginTop:1}}>{pt.label} · {lineLabel}</div>
+                        <div style={{minWidth:0}}>
+                          <div style={{fontSize:13,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.awayAbbr} @ {g.homeAbbr}</div>
+                          <div style={{fontSize:11,color:"#666"}}>{pt.label} · {lineLabel(pt.key,g)}</div>
                         </div>
                       </div>
-                      <div style={{fontSize:11,color:"#999"}}>{gameTime(g.commenceTime)}</div>
+                      <div style={{fontSize:11,color:"#999",flexShrink:0}}>{gameTime(g.commenceTime)}</div>
                     </div>
                   );
                 })}
@@ -293,9 +313,10 @@
 
             <div style={{display:"flex",gap:10}}>
               {submitted?(
-                <button onClick={()=>setSubmitted(false)} style={{flex:1,padding:"10px 0",fontSize:13,borderRadius:10}}>Edit picks</button>
+                <button onClick={()=>setSubmitted(false)} style={{flex:1,padding:"11px 0",fontSize:13,borderRadius:10}}>Edit picks</button>
               ):(
-                <button onClick={()=>{setLoading(true);setTimeout(()=>{setLoading(false);setSubmitted(true);},700);}} disabled={!allPicked||loading} style={{flex:1,padding:"10px 0",fontSize:14,fontWeight:600,borderRadius:10,border:"none",background:allPicked?"#1a1a1a":"#e5e5e3",color:allPicked?"#fff":"#999",cursor:allPicked?"pointer":"not-allowed"}}>
+                <button onClick={()=>{setLoading(true);setTimeout(()=>{setLoading(false);setSubmitted(true);},700);}} disabled={!allPicked||loading}
+                  style={{flex:1,padding:"11px 0",fontSize:14,fontWeight:600,borderRadius:10,border:"none",background:allPicked?"#1a1a1a":"#e5e5e3",color:allPicked?"#fff":"#999",cursor:allPicked?"pointer":"not-allowed"}}>
                   {loading?"Submitting...":allPicked?"Lock in picks":`${Object.values(picks).filter(Boolean).length} / 4 picks made`}
                 </button>
               )}
@@ -305,101 +326,52 @@
       );
     }
 
-    function LeaderboardPage() {
+    function LeaderboardPage(){
       const weeks=[1,2,3,4,5];const medals=["🥇","🥈","🥉"];
-      return (
+      return(
         <div style={{maxWidth:620,margin:"0 auto"}}>
-          <h2 style={{fontSize:18,fontWeight:600,margin:"0 0 3px"}}>Season standings</h2>
-          <p style={{fontSize:13,color:"#666",margin:"0 0 20px"}}>NFL 2025 · Week 1 of 18</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:24}}>
+          <h2 style={{fontSize:17,fontWeight:600,margin:"0 0 3px"}}>Season standings</h2>
+          <p style={{fontSize:13,color:"#666",margin:"0 0 16px"}}>NFL 2025 · Week 1 of 18</p>
+          <div className="stat-grid">
             {[["Leader",MOCK_LEADERBOARD[0].name,"ti-trophy"],["Avg pts","6.9","ti-chart-bar"],["Week high","3.0","ti-flame"],["Weeks left","14","ti-calendar"]].map(([label,val,icon])=>(
-              <div key={label} style={{background:"#f3f3f1",borderRadius:10,padding:"12px 14px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}><i className={`ti ${icon}`} style={{fontSize:13,color:"#999"}}/><span style={{fontSize:11,color:"#999",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em"}}>{label}</span></div>
-                <div style={{fontSize:16,fontWeight:600}}>{val}</div>
+              <div key={label} style={{background:"#f3f3f1",borderRadius:10,padding:"11px 12px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:3}}><i className={`ti ${icon}`} style={{fontSize:12,color:"#999"}}/><span style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{label}</span></div>
+                <div style={{fontSize:15,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{val}</div>
               </div>
             ))}
           </div>
-          <div style={{background:"#fff",border:"1px solid #e5e5e3",borderRadius:12,overflow:"hidden",marginBottom:24}}>
-            <div style={{display:"grid",gridTemplateColumns:"36px 1fr 60px 60px 60px 60px 60px",padding:"10px 16px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8"}}>
-              {["","Player","Over","Under","Fav","Dog","Pts"].map((h,i)=><span key={i} style={{fontSize:11,fontWeight:600,color:"#999",textAlign:i>1?"center":"left",letterSpacing:"0.04em"}}>{h}</span>)}
+          <div className="lb-scroll">
+            <div className="lb-table">
+              <div style={{display:"grid",gridTemplateColumns:"28px 1fr 52px 52px 52px 52px 52px",padding:"10px 12px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8"}}>
+                {["","Player","Over","Under","Fav","Dog","Pts"].map((h,i)=><span key={i} style={{fontSize:10,fontWeight:600,color:"#999",textAlign:i>1?"center":"left",letterSpacing:"0.04em",whiteSpace:"nowrap"}}>{h}</span>)}
+              </div>
+              {MOCK_LEADERBOARD.map((p,idx)=>{
+                const fmt=([w,push,l])=>`${w}-${push>0?push+"-":""}${l}`;
+                return(
+                  <div key={p.name} style={{display:"grid",gridTemplateColumns:"28px 1fr 52px 52px 52px 52px 52px",padding:"10px 12px",borderBottom:idx<MOCK_LEADERBOARD.length-1?"1px solid #e5e5e3":"none",alignItems:"center"}}>
+                    <span style={{fontSize:13}}>{medals[idx]||<span style={{fontSize:11,color:"#999",fontWeight:600}}>{idx+1}</span>}</span>
+                    <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><Avatar name={p.name} size={24}/><span style={{fontSize:13,fontWeight:idx===0?600:400,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</span></div>
+                    {[p.record.over,p.record.under,p.record.favorite,p.record.underdog].map((r,i)=><span key={i} style={{fontSize:11,color:"#666",textAlign:"center",whiteSpace:"nowrap"}}>{fmt(r)}</span>)}
+                    <span style={{fontSize:13,fontWeight:600,textAlign:"center",color:idx===0?"#d97706":"#1a1a1a"}}>{p.total}</span>
+                  </div>
+                );
+              })}
             </div>
-            {MOCK_LEADERBOARD.map((p,idx)=>{
-              const fmt=([w,push,l])=>`${w}-${push>0?push+"-":""}${l}`;
-              return (
-                <div key={p.name} style={{display:"grid",gridTemplateColumns:"36px 1fr 60px 60px 60px 60px 60px",padding:"12px 16px",borderBottom:idx<MOCK_LEADERBOARD.length-1?"1px solid #e5e5e3":"none",alignItems:"center"}}>
-                  <span style={{fontSize:14}}>{medals[idx]||<span style={{fontSize:12,color:"#999",fontWeight:600}}>{idx+1}</span>}</span>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}><Avatar name={p.name} size={28}/><span style={{fontSize:14,fontWeight:idx===0?600:400}}>{p.name}</span></div>
-                  {[p.record.over,p.record.under,p.record.favorite,p.record.underdog].map((r,i)=><span key={i} style={{fontSize:12,color:"#666",textAlign:"center"}}>{fmt(r)}</span>)}
-                  <span style={{fontSize:14,fontWeight:600,textAlign:"center",color:idx===0?"#d97706":"#1a1a1a"}}>{p.total}</span>
-                </div>
-              );
-            })}
           </div>
-          <h3 style={{fontSize:15,fontWeight:600,margin:"0 0 12px"}}>Week by week</h3>
-          <div style={{background:"#fff",border:"1px solid #e5e5e3",borderRadius:12,overflow:"hidden"}}>
-            <div style={{display:"grid",gridTemplateColumns:`1fr repeat(${weeks.length},44px) 50px`,padding:"10px 16px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8"}}>
-              <span style={{fontSize:11,fontWeight:600,color:"#999"}}>Player</span>
-              {weeks.map(w=><span key={w} style={{fontSize:11,fontWeight:600,color:"#999",textAlign:"center"}}>W{w}</span>)}
-              <span style={{fontSize:11,fontWeight:600,color:"#999",textAlign:"center"}}>Total</span>
-            </div>
-            {MOCK_LEADERBOARD.map((p,idx)=>(
-              <div key={p.name} style={{display:"grid",gridTemplateColumns:`1fr repeat(${weeks.length},44px) 50px`,padding:"10px 16px",borderBottom:idx<MOCK_LEADERBOARD.length-1?"1px solid #e5e5e3":"none",alignItems:"center"}}>
-                <span style={{fontSize:13}}>{p.name}</span>
-                {weeks.map((w,i)=>{const s=p.weekly[i];const c=s===undefined?"#ccc":s>=3?"#059669":s<=1?"#dc2626":"#1a1a1a";return <span key={w} style={{fontSize:13,textAlign:"center",color:c,fontWeight:s>=3?600:400}}>{s!==undefined?s:"—"}</span>;})}
-                <span style={{fontSize:14,fontWeight:600,textAlign:"center"}}>{p.total}</span>
+          <h3 style={{fontSize:14,fontWeight:600,margin:"0 0 10px"}}>Week by week</h3>
+          <div className="lb-scroll">
+            <div style={{minWidth:360}}>
+              <div style={{display:"grid",gridTemplateColumns:`1fr repeat(${weeks.length},40px) 46px`,padding:"10px 12px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8"}}>
+                <span style={{fontSize:10,fontWeight:600,color:"#999"}}>Player</span>
+                {weeks.map(w=><span key={w} style={{fontSize:10,fontWeight:600,color:"#999",textAlign:"center"}}>W{w}</span>)}
+                <span style={{fontSize:10,fontWeight:600,color:"#999",textAlign:"center"}}>Total</span>
               </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    function HistoryPage({user}) {
-      const rs={win:{bg:"rgba(5,150,105,0.1)",border:"#059669",text:"#059669",label:"Win +1"},push:{bg:"rgba(217,119,6,0.1)",border:"#d97706",text:"#d97706",label:"Push +0.5"},loss:{bg:"rgba(220,38,38,0.1)",border:"#dc2626",text:"#dc2626",label:"Loss"}};
-      const totals=MOCK_HISTORY.map(w=>Object.values(w.results).reduce((a,r)=>a+pickScore(r),0));
-      const total=totals.reduce((a,b)=>a+b,0);
-      return (
-        <div style={{maxWidth:560,margin:"0 auto"}}>
-          <h2 style={{fontSize:18,fontWeight:600,margin:"0 0 3px"}}>My history</h2>
-          <p style={{fontSize:13,color:"#666",margin:"0 0 20px"}}>Season record for {user}</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:24}}>
-            {[["Total pts",total,"ti-chart-bar"],["Weeks",MOCK_HISTORY.length,"ti-calendar"],["Best week",Math.max(...totals),"ti-flame"],["Avg",(total/MOCK_HISTORY.length).toFixed(1),"ti-math-function"]].map(([label,val,icon])=>(
-              <div key={label} style={{background:"#f3f3f1",borderRadius:10,padding:"12px 14px"}}>
-                <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:4}}><i className={`ti ${icon}`} style={{fontSize:13,color:"#999"}}/><span style={{fontSize:11,color:"#999",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em"}}>{label}</span></div>
-                <div style={{fontSize:16,fontWeight:600}}>{val}</div>
-              </div>
-            ))}
-          </div>
-          {MOCK_HISTORY.map((week,wi)=>{
-            const pts=totals[wi];
-            return (
-              <div key={week.week} style={{background:"#fff",border:"1px solid #e5e5e3",borderRadius:12,marginBottom:10,overflow:"hidden"}}>
-                <div style={{padding:"12px 16px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontSize:14,fontWeight:600}}>Week {week.week}</span>
-                  <span style={{fontSize:14,fontWeight:600,color:pts>=3?"#059669":pts<=1?"#dc2626":"#1a1a1a"}}>{pts} pts</span>
+              {MOCK_LEADERBOARD.map((p,idx)=>(
+                <div key={p.name} style={{display:"grid",gridTemplateColumns:`1fr repeat(${weeks.length},40px) 46px`,padding:"10px 12px",borderBottom:idx<MOCK_LEADERBOARD.length-1?"1px solid #e5e5e3":"none",alignItems:"center"}}>
+                  <span style={{fontSize:13,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</span>
+                  {weeks.map((w,i)=>{const s=p.weekly[i];const c=s===undefined?"#ccc":s>=3?"#059669":s<=1?"#dc2626":"#1a1a1a";return<span key={w} style={{fontSize:12,textAlign:"center",color:c,fontWeight:s>=3?600:400}}>{s!==undefined?s:"—"}</span>;})}
+                  <span style={{fontSize:13,fontWeight:600,textAlign:"center"}}>{p.total}</span>
                 </div>
-                <div style={{padding:"12px 16px",display:"grid",gap:10}}>
-                  {PICK_TYPES.map(pt=>{
-                    const pick=week.picks[pt.key];const result=week.results[pt.key];const r=rs[result];
-                    return (
-                      <div key={pt.key} style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                        <div style={{display:"flex",alignItems:"center",gap:8}}>
-                          <div style={{width:28,height:28,borderRadius:7,background:pt.accentBg,display:"flex",alignItems:"center",justifyContent:"center"}}><i className={`ti ${pt.icon}`} style={{fontSize:13,color:pt.accent}}/></div>
-                          <div><div style={{fontSize:13,fontWeight:600}}>{pick.label}</div><div style={{fontSize:11,color:"#999"}}>{pick.line}</div></div>
-                        </div>
-                        <span style={{fontSize:11,fontWeight:600,padding:"3px 10px",borderRadius:20,background:r.bg,color:r.text,border:`1px solid ${r.border}44`}}>{r.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-          <div style={{background:"#f3f3f1",borderRadius:12,padding:"14px 16px"}}>
-            <div style={{fontSize:11,fontWeight:600,color:"#999",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.04em"}}>Season breakdown</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,textAlign:"center"}}>
-              {[["Over","3-0-0","#059669"],["Under","2-1-0","#0284c7"],["Favorite","2-1-0","#d97706"],["Underdog","1-0-2","#dc2626"]].map(([label,rec,color])=>(
-                <div key={label}><div style={{fontSize:11,color:"#999",marginBottom:3}}>{label}</div><div style={{fontSize:14,fontWeight:600,color}}>{rec}</div></div>
               ))}
             </div>
           </div>
@@ -407,43 +379,101 @@
       );
     }
 
-    function AdminPage({games}) {
+    function HistoryPage({user}){
+      const rs={win:{bg:"rgba(5,150,105,0.1)",border:"#059669",text:"#059669",label:"Win +1"},push:{bg:"rgba(217,119,6,0.1)",border:"#d97706",text:"#d97706",label:"Push +0.5"},loss:{bg:"rgba(220,38,38,0.1)",border:"#dc2626",text:"#dc2626",label:"Loss"}};
+      const totals=MOCK_HISTORY.map(w=>Object.values(w.results).reduce((a,r)=>a+pickScore(r),0));
+      const total=totals.reduce((a,b)=>a+b,0);
+      return(
+        <div style={{maxWidth:560,margin:"0 auto"}}>
+          <h2 style={{fontSize:17,fontWeight:600,margin:"0 0 3px"}}>My history</h2>
+          <p style={{fontSize:13,color:"#666",margin:"0 0 16px"}}>Season record for {user}</p>
+          <div className="stat-grid">
+            {[["Total pts",total,"ti-chart-bar"],["Weeks",MOCK_HISTORY.length,"ti-calendar"],["Best week",Math.max(...totals),"ti-flame"],["Avg",(total/MOCK_HISTORY.length).toFixed(1),"ti-math-function"]].map(([label,val,icon])=>(
+              <div key={label} style={{background:"#f3f3f1",borderRadius:10,padding:"11px 12px"}}>
+                <div style={{display:"flex",alignItems:"center",gap:4,marginBottom:3}}><i className={`ti ${icon}`} style={{fontSize:12,color:"#999"}}/><span style={{fontSize:10,color:"#999",fontWeight:600,textTransform:"uppercase",letterSpacing:"0.04em"}}>{label}</span></div>
+                <div style={{fontSize:15,fontWeight:600}}>{val}</div>
+              </div>
+            ))}
+          </div>
+          {MOCK_HISTORY.map((week,wi)=>{
+            const pts=totals[wi];
+            return(
+              <div key={week.week} style={{background:"#fff",border:"1px solid #e5e5e3",borderRadius:12,marginBottom:10,overflow:"hidden"}}>
+                <div style={{padding:"11px 14px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:14,fontWeight:600}}>Week {week.week}</span>
+                  <span style={{fontSize:14,fontWeight:600,color:pts>=3?"#059669":pts<=1?"#dc2626":"#1a1a1a"}}>{pts} pts</span>
+                </div>
+                <div style={{padding:"12px 14px",display:"grid",gap:10}}>
+                  {PICK_TYPES.map(pt=>{
+                    const pick=week.picks[pt.key];const result=week.results[pt.key];const r=rs[result];
+                    return(
+                      <div key={pt.key} className="pick-row">
+                        <div className="pick-row-left">
+                          <div style={{width:26,height:26,borderRadius:7,background:pt.accentBg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><i className={`ti ${pt.icon}`} style={{fontSize:12,color:pt.accent}}/></div>
+                          <div style={{minWidth:0}}>
+                            <div className="pick-label">{pick.label}</div>
+                            {pick.line&&<div className="pick-line">{pick.line}</div>}
+                          </div>
+                        </div>
+                        <span style={{fontSize:11,fontWeight:600,padding:"3px 8px",borderRadius:20,background:r.bg,color:r.text,border:`1px solid ${r.border}44`,flexShrink:0,whiteSpace:"nowrap"}}>{r.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+          <div style={{background:"#f3f3f1",borderRadius:12,padding:"12px 14px"}}>
+            <div style={{fontSize:10,fontWeight:600,color:"#999",marginBottom:10,textTransform:"uppercase",letterSpacing:"0.04em"}}>Season breakdown</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,textAlign:"center"}}>
+              {[["Over","3-0-0","#059669"],["Under","2-1-0","#0284c7"],["Favorite","2-1-0","#d97706"],["Underdog","1-0-2","#dc2626"]].map(([label,rec,color])=>(
+                <div key={label}><div style={{fontSize:10,color:"#999",marginBottom:3}}>{label}</div><div style={{fontSize:13,fontWeight:600,color}}>{rec}</div></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function AdminPage({games}){
       const [results,setResults]=useState({});const [saved,setSaved]=useState(false);
       const samplePlayers=["Alex","Jordan","Sam"];
       const samplePicks=(player)=>{
         if(!games||games.length<4)return null;
         const idxMap={Alex:[0,1,2,3],Jordan:[1,2,3,0],Sam:[2,3,0,1]};
         const idx=idxMap[player]||[0,1,2,3];
-        return {over:games[idx[0]],under:games[idx[1]],favorite:games[idx[2]],underdog:games[idx[3]]};
+        return{over:games[idx[0]],under:games[idx[1]],favorite:games[idx[2]],underdog:games[idx[3]]};
       };
       const setResult=(player,type,result)=>{setResults(p=>({...p,[`${player}-${type}`]:result}));setSaved(false);};
-      const btnStyle=(active,type)=>{const c={win:{bg:"rgba(5,150,105,0.15)",color:"#059669"},push:{bg:"rgba(217,119,6,0.15)",color:"#d97706"},loss:{bg:"rgba(220,38,38,0.15)",color:"#dc2626"}};return{padding:"4px 12px",borderRadius:20,border:`1px solid ${active?c[type].color+"66":"#e5e5e3"}`,cursor:"pointer",fontSize:11,fontWeight:600,background:active?c[type].bg:"#f9f9f8",color:active?c[type].color:"#666"};};
-      return (
+      const btnStyle=(active,type)=>{const c={win:{bg:"rgba(5,150,105,0.15)",color:"#059669"},push:{bg:"rgba(217,119,6,0.15)",color:"#d97706"},loss:{bg:"rgba(220,38,38,0.15)",color:"#dc2626"}};return{padding:"4px 8px",borderRadius:16,border:`1px solid ${active?c[type].color+"66":"#e5e5e3"}`,cursor:"pointer",fontSize:11,fontWeight:600,background:active?c[type].bg:"#f9f9f8",color:active?c[type].color:"#666",whiteSpace:"nowrap"};};
+      return(
         <div style={{maxWidth:620,margin:"0 auto"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
-            <h2 style={{fontSize:18,fontWeight:600,margin:0}}>Enter results</h2>
-            <span style={{fontSize:11,fontWeight:600,padding:"4px 10px",borderRadius:20,background:"rgba(217,119,6,0.1)",color:"#d97706",border:"1px solid #d9770633"}}>Commissioner</span>
+            <h2 style={{fontSize:17,fontWeight:600,margin:0}}>Enter results</h2>
+            <span style={{fontSize:11,fontWeight:600,padding:"3px 8px",borderRadius:20,background:"rgba(217,119,6,0.1)",color:"#d97706",border:"1px solid #d9770633",whiteSpace:"nowrap"}}>Commissioner</span>
           </div>
-          <p style={{fontSize:13,color:"#666",margin:"0 0 20px"}}>Mark each pick as win, push, or loss</p>
+          <p style={{fontSize:13,color:"#666",margin:"0 0 16px"}}>Mark each pick as win, push, or loss</p>
           {games.length===0&&<p style={{fontSize:13,color:"#666"}}>Live odds must load before entering results.</p>}
           <div style={{display:"grid",gap:10}}>
             {samplePlayers.map(player=>{
               const pp=samplePicks(player);if(!pp)return null;
-              return (
+              return(
                 <div key={player} style={{background:"#fff",border:"1px solid #e5e5e3",borderRadius:12,overflow:"hidden"}}>
-                  <div style={{padding:"12px 16px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8",display:"flex",alignItems:"center",gap:8}}><Avatar name={player} size={26}/><span style={{fontSize:14,fontWeight:600}}>{player}</span></div>
-                  <div style={{padding:"12px 16px",display:"grid",gap:10}}>
+                  <div style={{padding:"11px 14px",borderBottom:"1px solid #e5e5e3",background:"#f9f9f8",display:"flex",alignItems:"center",gap:8}}><Avatar name={player} size={24}/><span style={{fontSize:14,fontWeight:600}}>{player}</span></div>
+                  <div style={{padding:"12px 14px",display:"grid",gap:10}}>
                     {PICK_TYPES.map(pt=>{
                       const g=pp[pt.key];const key=`${player}-${pt.key}`;const cur=results[key];
-                      const lineLabel=pt.key==="over"?`O ${g.total}`:pt.key==="under"?`U ${g.total}`:pt.key==="favorite"?`${g.favorite?.split(" ").pop()} ${g.spread}`:`${g.underdog?.split(" ").pop()} +${Math.abs(g.spread)}`;
-                      return (
-                        <div key={pt.key} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
-                          <div style={{display:"flex",alignItems:"center",gap:7}}>
-                            <i className={`ti ${pt.icon}`} style={{fontSize:13,color:pt.accent}}/>
-                            <span style={{fontSize:13,fontWeight:600}}>{g.awayAbbr} @ {g.homeAbbr}</span>
-                            <span style={{fontSize:12,color:"#999",marginLeft:4}}>{lineLabel}</span>
+                      const ll=pt.key==="over"?`O ${g.total}`:pt.key==="under"?`U ${g.total}`:pt.key==="favorite"?`${g.favorite?.split(" ").pop()} ${g.spread}`:`${g.underdog?.split(" ").pop()} +${Math.abs(g.spread)}`;
+                      return(
+                        <div key={pt.key} className="result-row">
+                          <div className="result-info">
+                            <i className={`ti ${pt.icon}`} style={{fontSize:13,color:pt.accent,flexShrink:0}}/>
+                            <div style={{minWidth:0}}>
+                              <div style={{fontSize:12,fontWeight:600,whiteSpace:"nowrap"}}>{g.awayAbbr} @ {g.homeAbbr}</div>
+                              <div style={{fontSize:11,color:"#999"}}>{ll}</div>
+                            </div>
                           </div>
-                          <div style={{display:"flex",gap:5}}>{["win","push","loss"].map(r=><button key={r} onClick={()=>setResult(player,pt.key,r)} style={btnStyle(cur===r,r)}>{r}</button>)}</div>
+                          <div className="result-btns">{["win","push","loss"].map(r=><button key={r} onClick={()=>setResult(player,pt.key,r)} style={btnStyle(cur===r,r)}>{r}</button>)}</div>
                         </div>
                       );
                     })}
@@ -452,30 +482,29 @@
               );
             })}
           </div>
-          {games.length>0&&<button onClick={()=>setSaved(true)} style={{marginTop:16,width:"100%",padding:"10px 0",fontSize:14,fontWeight:600,background:"#1a1a1a",color:"#fff",border:"none",borderRadius:10,cursor:"pointer"}}>{saved?"Saved!":"Save results"}</button>}
+          {games.length>0&&<button onClick={()=>setSaved(true)} style={{marginTop:14,width:"100%",padding:"11px 0",fontSize:14,fontWeight:600,background:"#1a1a1a",color:"#fff",border:"none",borderRadius:10,cursor:"pointer"}}>{saved?"Saved!":"Save results"}</button>}
         </div>
       );
     }
 
-    function App() {
+    function App(){
       const [user,setUser]=useState(null);
       const [page,setPage]=useState("picks");
-      if(!user)return <LoginPage onLogin={setUser}/>;
-      return (
+      if(!user)return<LoginPage onLogin={setUser}/>;
+      return(
         <OddsLoader>
           {({games,error,fetchOdds,lastUpdated})=>(
-            <div style={{maxWidth:680,margin:"0 auto",padding:"20px 16px"}}>
-              <h2 className="sr-only">NFL Pick'em Challenge App</h2>
-              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:24}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <i className="ti ti-ball-football" style={{fontSize:20}}/>
+            <div style={{maxWidth:680,margin:"0 auto",padding:"16px 14px"}}>
+              <div className="app-header">
+                <div className="app-title">
+                  <i className="ti ti-ball-football" style={{fontSize:20,flexShrink:0}}/>
                   <span style={{fontSize:16,fontWeight:600}}>Pick'em</span>
-                  <span style={{fontSize:12,color:"#999",background:"#f3f3f1",padding:"2px 8px",borderRadius:6}}>NFL 2025</span>
+                  <span style={{fontSize:11,color:"#999",background:"#f3f3f1",padding:"2px 7px",borderRadius:6,whiteSpace:"nowrap"}}>NFL 2025</span>
                 </div>
-                <div style={{display:"flex",alignItems:"center",gap:8}}>
-                  <Avatar name={user} size={28}/>
-                  <span style={{fontSize:13,color:"#666"}}>{user}</span>
-                  <button onClick={()=>setUser(null)} style={{fontSize:12,padding:"4px 8px",color:"#999"}}>Sign out</button>
+                <div className="app-user">
+                  <Avatar name={user} size={26}/>
+                  <span style={{fontSize:13,color:"#666",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:80}}>{user}</span>
+                  <button onClick={()=>setUser(null)} style={{fontSize:11,padding:"3px 7px",color:"#999",whiteSpace:"nowrap"}}>Out</button>
                 </div>
               </div>
               <NavBar page={page} setPage={setPage}/>
@@ -489,7 +518,7 @@
       );
     }
 
-    const root = ReactDOM.createRoot(document.getElementById("root"));
+    const root=ReactDOM.createRoot(document.getElementById("root"));
     root.render(<App/>);
   </script>
 </body>
